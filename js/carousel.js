@@ -1,17 +1,10 @@
 (function($){
 	
-	var Templates = {
-		container: 	'<div class="carousel"></div>',
-		content: '<div class="carousel-content"></div>',
-		backBtn: '<a href="#" class="back-button">Prev</a>',
-		nextBtn: '<a href="#" class="next-button">Next</a>'
-	};
-	
 	/**
 	 *  Creates a new Carousel from an unordered list of elements
 	 *  
 	 *  @param options options for the Carousel
-	 *  @param options.itemsPerPage no of items to show per page
+	 *  @param options.animate true if sliding behavior is expected
 	 *  @param list unordered list element
 	 */
 	function Carousel(options, list){
