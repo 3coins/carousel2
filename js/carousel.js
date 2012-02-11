@@ -4,7 +4,9 @@
 	 *  Creates a new Carousel from an unordered list of elements
 	 *  
 	 *  @param options options for the Carousel
-	 *  @param options.animate true if sliding behavior is expected
+	 *  @param options.animate (optional, default is true) true if sliding behavior is expected
+	 *  @param options.autoRotate (optional, default is true) true if want to rotate elements automagically
+	 *  @param options.autoRotateDelay (optional, default is 3s) delay in seconds between element rotation
 	 *  @param list unordered list element
 	 */
 	function Carousel(options, list){
@@ -17,12 +19,19 @@
 		this.list.data("carousel", this);
 		
 		this.settings = $.extend({},{
-			animate: true
+			animate: true,
+			autoRotate: true,
+			autoRotateDelay: 3
 		}, options);
 		
 		this.action = this.settings.animate ? "animate" : "css";
 		
 		this._init();
+
+		this.autoRotate = this.settings.autoRotate;
+		if(this.autoRotate){
+			this._startRotation();
+		}
 	}
 	
 	/**
@@ -46,12 +55,37 @@
 		nextBtn.click($.proxy(this._goForward, this));
 	}
 	
-	
+	/**
+	 *	@private
+	 */
+	Carousel.prototype._startRotation = function(){
+		var self = this;
+		if(this.autoRotate){
+			this.autoRotateTimer = setTimeout(function(){
+				self._goForward();
+			}, this.settings.autoRotateDelay * 1000);
+		}
+	};
+
+	/**
+	 *	@private
+	 */
+	Carousel.prototype._stopRotation = function(){
+		if(this.autoRotateTimer) clearTimeout(this.autoRotateTimer);
+		this.autoRotate = false;	
+	};
+
+		
 	/**
 	 *  @private
 	 */
 	Carousel.prototype._goBack = function(e){
-		e.preventDefault();
+		if(e){
+			e.preventDefault();
+			this._stopRotation();
+		}else{
+			this._startRotation();
+		}
 		var that = this;
 		var list = that.list;
 		var items = that.items;
@@ -90,7 +124,12 @@
 	 *  @private
 	 */
 	Carousel.prototype._goForward = function(e){
-		e.preventDefault();
+		if(e){
+			e.preventDefault();
+			this._stopRotation();
+		}else{
+			this._startRotation();	
+		}
 		var items = this.items;
 		var list = this.list;
 		if(this._isLastPage()){
@@ -122,6 +161,9 @@
 	 */
 	Carousel.prototype._destroy = function(){
 		var list = this.list;
+		if(this.autoRotateTimer){
+			clearTimeout(autoRotateTimer);	
+		}
 		list.parent().parent().find(">a").unbind("click");
 		var self = this;
 		// IE7 needs some redirection when deleting "this"
