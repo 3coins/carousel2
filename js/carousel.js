@@ -35,6 +35,7 @@
 		var backBtn = list.parent().find(".back-button");
 		var nextBtn = list.parent().find(".next-button");
 		var items = list.find(">li");
+		this.items = items;
 		
 		this.contentWidth = $(items[0]).width();
 		this.list.width(items.length * this.contentWidth);
@@ -51,11 +52,38 @@
 	 */
 	Carousel.prototype._goBack = function(e){
 		e.preventDefault();
-		
-		if(this.loopIndex < 1){
-			this.loopIndex = this.noOfLoops;
+		var that = this;
+		var list = that.list;
+		var items = that.items;
+		if(this._isFirstPage()){
+			list.width(this.contentWidth * (items.length + 1));
+			$(items[items.length - 1]).clone().prependTo(list);
+			list.css({left: -that.contentWidth});
+			var that = this;
+			this._updateListPos(0, function(){	
+				that.loopIndex = items.length - 1;
+				list.find(">li").first().remove();
+				list.width($(items[0]).width() * items.length);
+				list.css({"left": -that.contentWidth * (items.length - 1)});
+			});
+		}else{
+			this._updateListPos(-this.contentWidth * (--this.loopIndex));	
 		}
-		this._updateListPos(-this.contentWidth * (--this.loopIndex));
+
+	}
+	
+	/**
+	 *  @private
+	 */
+	Carousel.prototype._isLastPage = function(){
+		 return (this.loopIndex == this.noOfLoops - 1);
+	}
+	
+	/**
+	 *  @private
+	 */
+	Carousel.prototype._isFirstPage = function(){
+		return (this.loopIndex < 1);
 	}
 	
 	/**
@@ -63,17 +91,30 @@
 	 */
 	Carousel.prototype._goForward = function(e){
 		e.preventDefault();
-		if(this.loopIndex >= this.noOfLoops - 1){
-			this.loopIndex = -1;
+		var items = this.items;
+		var list = this.list;
+		if(this._isLastPage()){
+			list.width(this.contentWidth * (items.length + 1));
+			$(items[0]).clone().appendTo(list);
+			var that = this;
+			this._updateListPos(-this.contentWidth * (this.loopIndex + 1), function(){	
+				that.loopIndex = 0;
+				list.css({"left": 0});
+				//remove the last li
+				list.find(">li").last().remove();
+				list.width($(items[0]).width() * items.length);
+			});
+		}else{
+			this._updateListPos(-this.contentWidth * (++this.loopIndex));
 		}
-		this._updateListPos(-this.contentWidth * (++this.loopIndex));
+		
 	}
 	
 	/**
 	 *  @private
 	 */
-	Carousel.prototype._updateListPos = function(pos){
-		this.list[this.action]({"left": pos});
+	Carousel.prototype._updateListPos = function(pos, callback){
+		this.list[this.action]({"left": pos}, 400, callback || function(){});
 	}
 	
 	/**
