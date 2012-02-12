@@ -153,7 +153,7 @@
 	 *  @private
 	 */
 	Carousel.prototype._updateListPos = function(pos, callback){
-		this.list[this.action]({"left": pos}, 400, callback || function(){});
+		this.list[this.action]({"left": pos}, 500, callback || function(){});
 	}
 	
 	/**
